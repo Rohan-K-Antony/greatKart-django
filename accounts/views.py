@@ -12,7 +12,14 @@ from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
-# Create your views here.
+
+
+# for redirecting to correct page
+import requests
+
+# cart assinging 
+from carts.models import CartItem,Cart
+from carts.views import _cart_id
 def register(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
@@ -66,9 +73,50 @@ def login(request):
         user = auth.authenticate(email = email,password = password)
 
         if user is not None:
+            try:
+                cart = Cart.objects.get(cart_id= _cart_id(request))
+                cart_items_flag = CartItem.objects.filter(cart=cart).exists()
+                product_variation=[]
+                if cart_items_flag :
+                    for cart_item in CartItem.objects.filter(cart=cart):
+                        for itm in cart_item.variation.all():
+                            product_variation.append(itm)
+                        add_flag =True
+                        for item in CartItem.objects.filter(user=user,is_active=True):
+                            if item.product.product_name == cart_item.product.product_name:
+                                existing_variation = []
+                                for itc in item.variation.all():
+                                    existing_variation.append(itc)
+                                if product_variation == existing_variation:
+                                    print('product name same and varaition same')
+                                    item.quantity += 1
+                                    item.save()
+                                    add_flag=False
+                                else:
+                                    print('product name same and varaition not same')
+                                    cart_item.user = user
+                                    cart_item.save()
+                                    add_flag=False
+                        if add_flag:
+                            print('product doesnot already exists')
+                            cart_item.user = user
+                            cart_item.save()
+    
+
+            except Cart.DoesNotExist:
+                pass
             auth.login(request,user)
             #messages.success(request, 'You are logged in')
-            return redirect('dashboard')
+            url = request.META.get('HTTP_REFERER')
+            try:
+                query = requests.utils.urlparse(url).query
+                # next=/cart/checkout/
+                params = dict(x.split('=') for x in query.split('&'))
+                if 'next' in params:
+                    nextPage = params['next']
+                    return redirect(nextPage)
+            except:
+                return redirect('dashboard')
         else:
             messages.error(request, "Invalid credentials")
             return redirect('login')
