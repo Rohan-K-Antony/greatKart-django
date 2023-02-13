@@ -42,7 +42,9 @@ INSTALLED_APPS = [
     'accounts',
     'store',
     'carts',
-    'django.contrib.humanize'
+    'django.contrib.humanize',
+    'orders'
+
 ]
 
 MIDDLEWARE = [
@@ -152,3 +154,4 @@ EMAIL_PORT=587
 EMAIL_HOST_USER='djangoa335@gmail.com'
 EMAIL_HOST_PASSWORD='gcldxiflsdevptaa'
 EMAIL_USE_TLS=True
+DEFAULT_FROM_EMAIL='GreatKart'
