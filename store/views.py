@@ -1,5 +1,5 @@
 from django.shortcuts import render,get_object_or_404,redirect
-from .models import product,Variation
+from .models import product,Variation,ProductGallery
 from django.db.models import Q
 from category.models import Category
 from carts.models import Cart,CartItem
@@ -38,6 +38,7 @@ def product_detail(request,category_slug,product_slug):
     cart_item=None
     variation_color = Variation.objects.filter(Q(product=product_detail)&Q(variation_category='color'))
     variation_size = Variation.objects.filter(Q(product=product_detail)&Q(variation_category='size'))
+    product_images = ProductGallery.objects.filter(Q(productItem = product_detail))
     try:
         cart_user = Cart.objects.get(cart_id= _cart_id(request))
         in_cart = CartItem.objects.filter(cart=cart_user,product=product_detail.id).exists()
@@ -49,7 +50,8 @@ def product_detail(request,category_slug,product_slug):
         'product_detail':product_detail,
         'in_cart':cart_item,
         'variation_color':variation_color,
-        'variation_size':variation_size
+        'variation_size':variation_size,
+        'product_images':product_images
     }
     return render(request,'store/product_detail.html',data)
 

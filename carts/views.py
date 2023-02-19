@@ -299,3 +299,4 @@ def checkout(request):
         'grand_total':grand_total
     }
     return render(request,'store/checkout.html',data)
+

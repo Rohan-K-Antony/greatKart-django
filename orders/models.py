@@ -1,6 +1,7 @@
 from django.db import models
 from accounts.models import Account
 from store.models import product,Variation
+from django.urls import reverse
 # Create your models here.
 class Payment(models.Model):
     user = models.ForeignKey(Account,on_delete=models.CASCADE)
@@ -49,6 +50,9 @@ class Order(models.Model):
 
     def full_address(self):
         return f'{self.address_line_1} {self.address_line_2}'
+    
+    def get_url(self):
+        return reverse('order_details' , kwargs={'order_id':self.order_number})
 
     def __str__(self):
         return self.order_number

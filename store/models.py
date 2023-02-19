@@ -43,3 +43,13 @@ class Variation(models.Model):
     objects = VariationManager()
     def __str__(self):
         return self.variation_value
+
+class ProductGallery(models.Model):
+    productItem = models.ForeignKey(product,on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='store/products',max_length=255)
+    class Meta:
+        verbose_name = 'Product Gallery Item'
+        verbose_name_plural = 'Product Gallery Items'
+
+    def __str__(self) -> str:
+        return self.productItem.product_name
